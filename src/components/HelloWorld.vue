@@ -1,35 +1,90 @@
 <script setup lang="ts">
 import {inject, ref} from "vue";
-
+// import { sendAndConfirmTransaction, clusterApiUrl, Connection  } from "@solana/web3.js";
+import * as web3 from '@solana/web3.js';
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import * as SPLToken from "@solana/spl-token";
+import { WalletMultiButton  } from 'solana-wallets-vue'
+import { useWallet } from 'solana-wallets-vue';
+import { PublicKey,Connection, clusterApiUrl, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { Metadata } from "@metaplex-foundation/mpl-token-metadata";
+const { publicKey, sendTransaction } = useWallet();
 const phantom: any = inject("phantom");
 const publicWalletAddress = ref("");
-
 const connectPhantom = async () => {
   if (phantom) {
     const response = await phantom.connect();
+   
     publicWalletAddress.value = response.publicKey.toString();
-    console.log('Connected with Public Key:', response)
+    console.log('Connected with Public Key:', response )
   }
 }
+const getInfo= async () => {
+  const connection = new Connection("https://api.devnet.solana.com");
+  const response = await phantom.connect();
+   
+
+  let account = await connection.getAccountInfo(publicKey.value);
+  let balance =await connection.getBalance(publicKey.value) / LAMPORTS_PER_SOL
+  console.log("publicKey: " ,publicKey.value)
+  console.log("account: " ,account);
+  console.log("balance: " , balance)
+  console.log("PubKey String: " , publicKey.value?.toJSON())
+
+  
+  let pbkeyStr:string =  publicKey.value?.toJSON();
+  let resp = await connection.getTokenAccountsByOwner(
+    new PublicKey(pbkeyStr), // owner here
+    {
+      programId: TOKEN_PROGRAM_ID,
+    }
+  );
+  
+  resp.value.forEach(async (e) => {
+    console.log(`pubkey: ${e.pubkey.toBase58()}`);
+    const accountInfo = SPLToken.AccountLayout.decode(e.account.data);
+    console.log(`mint: ${new PublicKey(accountInfo.mint)}`);
+    let mintPubkey = new PublicKey(accountInfo.mint);
+  let tokenmetaPubkey = await Metadata.getPDA(mintPubkey);
+
+  const tokenmeta = await Metadata.load(connection, tokenmetaPubkey);
+  console.log(tokenmeta);
+    // console.log(`amount: ${SPLToken.u64.fromBuffer(accountInfo.amount)}`);
+  });
+  
+
+}
+
+
+
+
+
+
+
 
 </script>
 
 <template>
   <div id="main-container">
-    <template v-if="phantom && !publicWalletAddress">
+    <template v-if="phantom && !publicKey">
       <button
           class="btn-mg"
           @click="connectPhantom"
       >
         CONNECT WALLET
       </button>
+        <wallet-multi-button></wallet-multi-button>
+        <button @click="getInfo">Get Stuff</button>
+
     </template>
 
-    <template v-if="publicWalletAddress">
+    <template v-if="publicKey">
       <div>
         <p class="text-white-mg">
           Welcome to the Solana network, <br/>
           <strong>{{ publicWalletAddress }}</strong>
+          <button @click="getInfo">Get Stuff</button>
+          <button @click="getNfts">Get Nfts</button>
         </p>
         <div >
           <img src="static/images/welcome.gif" alt="welcome gif" />

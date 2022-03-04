@@ -5,10 +5,10 @@ import HelloWorld from './components/HelloWorld.vue'
 import {provide} from "vue";
 
 // @ts-ignore
-const { solana } = window;
 
-if (solana?.isPhantom) {
-  provide("phantom", solana);
+if (window.solana?.isPhantom) {
+  provide("phantom", window.solana)
+
 } else {
   provide("phantom", null);
 }
@@ -16,7 +16,8 @@ if (solana?.isPhantom) {
 </script>
 
 <template>
-  <HelloWorld />
+   <HelloWorld />
+
 </template>
 
 <style>

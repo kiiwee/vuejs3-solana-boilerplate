@@ -7,7 +7,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.2.25"
+    "@metaplex-foundation/mpl-token-metadata": "^1.2.5",
+    "@rollup/plugin-inject": "^4.0.4",
+    "@solana/buffer-layout": "^4.0.0",
+    "@solana/spl-token": "^0.2.0",
+    "@solana/wallet-adapter-wallets": "^0.15.4",
+    "@solana/web3.js": "^1.36.0",
+    "node-ray": "^1.18.0",
+    "solana-wallets-vue": "^0.3.1",
+    "vue": "^3.2.25",
+    "vue-router": "^4.0.12"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^2.0.0",
